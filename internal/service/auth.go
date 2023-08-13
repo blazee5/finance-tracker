@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/blazee5/finance-tracker/internal/models"
 	"github.com/golang-jwt/jwt/v5"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
 
@@ -18,7 +17,7 @@ const (
 
 type tokenClaims struct {
 	jwt.RegisteredClaims
-	UserId primitive.ObjectID `json:"user_id"`
+	UserId string `json:"user_id"`
 }
 
 func (s *Service) CreateUser(user models.User) (interface{}, error) {
@@ -50,6 +49,19 @@ func (s *Service) GenerateToken(email, password string) (string, error) {
 	})
 
 	return token.SignedString([]byte(signingKey))
+}
+
+func ParseToken(token string) (string, error) {
+	claims := &tokenClaims{}
+	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(signingKey), nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return claims.UserId, nil
 }
 
 func GenerateHashPassword(password string) string {

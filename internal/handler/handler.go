@@ -22,10 +22,10 @@ func (h *Handler) InitRoutes(app *fiber.App) {
 
 	api := fiber.Router(app).Group("/api")
 	{
-		api.Get("/transactions/:userId", GetTransactions)
-		api.Post("/transactions", CreateTransaction)
-		api.Get("/transactions/:id", GetTransaction)
-		api.Put("/transactions/:id", UpdateTransaction)
-		api.Delete("/transactions/:id", DeleteTransaction)
+		api.Get("/transactions/:userId", h.userIdentity, h.GetTransactions)
+		api.Post("/transactions", h.userIdentity, h.CreateTransaction)
+		api.Get("/transaction/:id", h.userIdentity, h.GetTransaction)
+		api.Put("/transactions/:id", h.userIdentity, h.UpdateTransaction)
+		api.Delete("/transactions/:id", h.userIdentity, h.DeleteTransaction)
 	}
 }
