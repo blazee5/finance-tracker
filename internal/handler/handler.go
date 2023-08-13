@@ -1,12 +1,23 @@
 package handler
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/blazee5/finance-tracker/internal/service"
+	"github.com/gofiber/fiber/v2"
+)
 
-func InitRoutes(app *fiber.App) {
+type Handler struct {
+	Service *service.Service
+}
+
+func NewHandler(service *service.Service) *Handler {
+	return &Handler{Service: service}
+}
+
+func (h *Handler) InitRoutes(app *fiber.App) {
 	auth := fiber.Router(app).Group("/auth")
 	{
-		auth.Post("/signup", SignUp)
-		auth.Post("/signin", SignIn)
+		auth.Post("/signup", h.SignUp)
+		auth.Post("/signin", h.SignIn)
 	}
 
 	api := fiber.Router(app).Group("/api")
