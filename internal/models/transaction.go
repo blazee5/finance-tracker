@@ -7,3 +7,9 @@ type Transaction struct {
 	Amount      int    `json:"amount" bson:"amount"`
 	Type        string `json:"type" bson:"type"`
 }
+
+type Analyze struct {
+	TotalIncome  int `json:"total_income" bson:"total_income"`
+	TotalExpense int `json:"total_expense" bson:"total_expense"`
+	Total        int `json:"total" bson:"total"`
+}

@@ -61,15 +61,44 @@ func (db *TransactionDAO) Update(ctx context.Context, transaction models.Transac
 	return res.ModifiedCount, nil
 }
 
-func (db *TransactionDAO) Delete(ctx context.Context, id string) (int64, error) {
+func (db *TransactionDAO) Delete(ctx context.Context, id string) error {
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	res, err := db.c.DeleteOne(ctx, bson.D{{"_id", objectId}})
+	_, err = db.c.DeleteOne(ctx, bson.D{{"_id", objectId}})
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	return res.DeletedCount, nil
+	return nil
+}
+
+func (db *TransactionDAO) GetAnalyze(ctx context.Context, id string) ([]models.Analyze, error) {
+	var analyze []models.Analyze
+
+	cursor, err := db.c.Aggregate(ctx, []bson.M{
+		{"$match": bson.M{"user_id": id}},
+		{"$group": bson.M{
+			"_id":           nil,
+			"total_income":  bson.M{"$sum": bson.M{"$cond": []interface{}{bson.M{"$eq": []interface{}{"$type", "income"}}, "$amount", 0}}},
+			"total_expense": bson.M{"$sum": bson.M{"$cond": []interface{}{bson.M{"$eq": []interface{}{"$type", "expense"}}, "$amount", 0}}},
+		}},
+		{"$project": bson.M{
+			"_id":           0,
+			"total_income":  1,
+			"total_expense": 1,
+			"total":         bson.M{"$subtract": []interface{}{"$total_income", "$total_expense"}},
+		}},
+	})
+
+	if err != nil {
+		return []models.Analyze{}, err
+	}
+
+	if err = cursor.All(ctx, &analyze); err != nil {
+		return []models.Analyze{}, err
+	}
+
+	return analyze, nil
 }

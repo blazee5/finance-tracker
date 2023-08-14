@@ -86,17 +86,31 @@ func (h *Handler) UpdateTransaction(c *fiber.Ctx) error {
 }
 
 func (h *Handler) DeleteTransaction(c *fiber.Ctx) error {
-	res, err := h.Service.DeleteTransaction(c.Params("id"))
+	transaction, err := h.Service.GetTransaction(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).SendString("transaction not found")
+	}
+	if c.Locals("userId") != transaction.UserID {
+		return c.Status(fiber.StatusForbidden).SendString("Forbidden")
+	}
+
+	err = h.Service.DeleteTransaction(c.Params("id"))
 
 	if err != nil {
 		return err
 	}
 
-	if res == 0 {
-		return c.Status(fiber.StatusBadRequest).SendString("transaction not found")
-	}
-
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": "success",
 	})
+}
+
+func (h *Handler) AnalyzeTransactions(c *fiber.Ctx) error {
+	res, err := h.Service.AnalyzeTransactions(c.Locals("userId").(string))
+
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(res[0])
 }

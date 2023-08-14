@@ -21,6 +21,10 @@ func (s *Service) UpdateTransaction(transaction models.Transaction) (int64, erro
 	return s.Storage.TransactionDAO.Update(context.Background(), transaction)
 }
 
-func (s *Service) DeleteTransaction(id string) (int64, error) {
+func (s *Service) DeleteTransaction(id string) error {
 	return s.Storage.TransactionDAO.Delete(context.Background(), id)
+}
+
+func (s *Service) AnalyzeTransactions(id string) ([]models.Analyze, error) {
+	return s.Storage.TransactionDAO.GetAnalyze(context.Background(), id)
 }

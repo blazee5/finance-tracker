@@ -22,6 +22,7 @@ func (h *Handler) InitRoutes(app *fiber.App) {
 
 	api := fiber.Router(app).Group("/api")
 	{
+		api.Get("/transactions/analyze", h.userIdentity, h.AnalyzeTransactions)
 		api.Get("/transactions/:userId", h.userIdentity, h.GetTransactions)
 		api.Post("/transactions", h.userIdentity, h.CreateTransaction)
 		api.Get("/transaction/:id", h.userIdentity, h.GetTransaction)
