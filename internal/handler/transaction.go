@@ -101,7 +101,7 @@ func (h *Handler) DeleteTransaction(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success": "success",
+		"status": "success",
 	})
 }
 

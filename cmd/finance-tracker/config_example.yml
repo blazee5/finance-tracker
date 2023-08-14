@@ -1,0 +1,10 @@
+env: "local"
+db_host: "localhost"
+db_port: "27017"
+db_user: ""
+db_password: ""
+db_name: "finance-tracker"
+
+http_server:
+  host: "localhost"
+  port: "3000"
