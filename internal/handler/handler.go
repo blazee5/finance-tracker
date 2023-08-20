@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/blazee5/finance-tracker/internal/service"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
 )
 
 type Handler struct {
@@ -29,4 +30,6 @@ func (h *Handler) InitRoutes(app *fiber.App) {
 		api.Put("/transactions/:id", h.userIdentity, h.UpdateTransaction)
 		api.Delete("/transactions/:id", h.userIdentity, h.DeleteTransaction)
 	}
+
+	app.Get("/swagger/*", swagger.HandlerDefault)
 }

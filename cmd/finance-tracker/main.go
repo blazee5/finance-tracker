@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	_ "github.com/blazee5/finance-tracker/docs"
 	"github.com/blazee5/finance-tracker/internal/config"
 	"github.com/blazee5/finance-tracker/internal/handler"
 	"github.com/blazee5/finance-tracker/internal/service"
@@ -10,6 +11,11 @@ import (
 	"go.uber.org/zap"
 )
 
+// @title Finance Tracker API
+// @version 1.0
+// @description Finance Tracker API Documentation
+// @host localhost:3000
+// @BasePath /
 func main() {
 	cfg := config.LoadConfig()
 
@@ -32,6 +38,8 @@ func main() {
 	handlers := handler.NewHandler(services)
 
 	handlers.InitRoutes(app)
+
+	fmt.Println(service.GenerateHashPassword("password"))
 
 	log.Fatal(app.Listen(fmt.Sprintf("%s:%s", cfg.Host, cfg.Port)))
 

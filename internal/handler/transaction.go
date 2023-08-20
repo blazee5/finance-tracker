@@ -8,6 +8,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// @Summary Get transactions
+// @Description Get transactions
+// @Tags transactions
+// @Accept json
+// @Produce json
+// @Authorization BearerAuth "Authorization"
+// @Success 200 {object} []models.Transaction
+// @Router /api/transactions/{userId} [get]
 func (h *Handler) GetTransactions(c *fiber.Ctx) error {
 	transaction, err := h.Service.GetTransactions(c.Params("userId"))
 	if err != nil {
@@ -16,6 +24,15 @@ func (h *Handler) GetTransactions(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(transaction)
 }
 
+// @Summary Create transaction
+// @Description Create transaction
+// @Tags transactions
+// @Accept json
+// @Produce json
+// @Authorization BearerAuth "Authorization"
+// @Param transaction body models.Transaction true "Transaction"
+// @Success 201 {object} string
+// @Router /api/transactions [post]
 func (h *Handler) CreateTransaction(c *fiber.Ctx) error {
 	var input models.Transaction
 
@@ -34,6 +51,15 @@ func (h *Handler) CreateTransaction(c *fiber.Ctx) error {
 
 }
 
+// @Summary Get transaction
+// @Description Get transaction
+// @Tags transactions
+// @Accept json
+// @Produce json
+// @Authorization BearerAuth "Authorization"
+// @Param id path string true "Transaction ID"
+// @Success 200 {object} models.Transaction
+// @Router /api/transaction/{id} [get]
 func (h *Handler) GetTransaction(c *fiber.Ctx) error {
 	transaction, err := h.Service.GetTransaction(c.Params("id"))
 
@@ -56,6 +82,16 @@ func (h *Handler) GetTransaction(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(transaction)
 }
 
+// @Summary Update transaction
+// @Description Update transaction
+// @Tags transactions
+// @Accept json
+// @Produce json
+// @Authorization BearerAuth "Authorization"
+// @Param id path string true "Transaction ID"
+// @Param transaction body models.Transaction true "Transaction"
+// @Success 200 {object} string
+// @Router /api/transactions/{id} [put]
 func (h *Handler) UpdateTransaction(c *fiber.Ctx) error {
 	var input models.Transaction
 
@@ -85,6 +121,15 @@ func (h *Handler) UpdateTransaction(c *fiber.Ctx) error {
 
 }
 
+// @Summary Delete transaction
+// @Description Delete transaction
+// @Tags transactions
+// @Accept json
+// @Produce json
+// @Authorization BearerAuth "Authorization"
+// @Param id path string true "Transaction ID"
+// @Success 200 {object} string
+// @Router /api/transactions/{id} [delete]
 func (h *Handler) DeleteTransaction(c *fiber.Ctx) error {
 	transaction, err := h.Service.GetTransaction(c.Params("id"))
 	if err != nil {

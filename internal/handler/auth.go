@@ -5,6 +5,23 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// @Summary Sign up
+// @Tags auth
+// @Description sign up
+// @ID sign-up
+// @Accept  json
+// @Produce  json
+// @Param user body models.User true "User"
+// @Success 201 {string} string	"ok"
+//
+//	@Example request: {
+//	  "email": "test@test",
+//	  "password": "test"
+//	}
+//
+// @Failure 400 {string} string "bad request"
+// @Failure 500 {string} string "internal server error"
+// @Router /auth/signup [post]
 func (h *Handler) SignUp(c *fiber.Ctx) error {
 	var input models.User
 
@@ -21,6 +38,17 @@ func (h *Handler) SignUp(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(id)
 }
 
+// @Summary Sign in
+// @Tags auth
+// @Description sign in
+// @ID sign-in
+// @Accept  json
+// @Produce  json
+// @Param user body models.User true "User"
+// @Success 200 {string} string	"ok"
+// @Failure 400 {string} string "bad request"
+// @Failure 500 {string} string "internal server error"
+// @Router /auth/signin [post]
 func (h *Handler) SignIn(c *fiber.Ctx) error {
 	var input models.User
 
