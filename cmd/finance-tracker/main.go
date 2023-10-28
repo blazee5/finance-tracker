@@ -39,8 +39,5 @@ func main() {
 
 	handlers.InitRoutes(app)
 
-	fmt.Println(service.GenerateHashPassword("password"))
-
 	log.Fatal(app.Listen(fmt.Sprintf("%s:%s", cfg.Host, cfg.Port)))
-
 }

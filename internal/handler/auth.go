@@ -35,7 +35,9 @@ func (h *Handler) SignUp(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(id)
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"id": id,
+	})
 }
 
 // @Summary Sign in
@@ -55,7 +57,6 @@ func (h *Handler) SignIn(c *fiber.Ctx) error {
 	if err := c.BodyParser(&input); err != nil {
 		return err
 	}
-
 	token, err := h.Service.GenerateToken(input.Email, input.Password)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON("invalid credentials")
