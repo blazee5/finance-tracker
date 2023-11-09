@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/blazee5/finance-tracker/internal/service"
+	"github.com/blazee5/finance-tracker/lib/auth"
 	"github.com/gofiber/fiber/v2"
 	"strings"
 )
@@ -18,7 +18,7 @@ func (h *Handler) userIdentity(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).SendString("invalid authorization header")
 	}
 
-	userId, err := service.ParseToken(headerParts[1])
+	userId, err := auth.ParseToken(headerParts[1])
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).SendString(err.Error())
 	}

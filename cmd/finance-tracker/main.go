@@ -8,6 +8,7 @@ import (
 	"github.com/blazee5/finance-tracker/internal/service"
 	storage "github.com/blazee5/finance-tracker/internal/storage/mongodb"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"go.uber.org/zap"
 )
 
@@ -30,6 +31,7 @@ func main() {
 	}
 
 	app := fiber.New()
+	app.Use(cors.New())
 
 	userRepo, err := storage.NewUserDAO(db.Db, cfg)
 	transactionRepo, err := storage.NewTransactionDAO(db.Db, cfg)
@@ -39,8 +41,5 @@ func main() {
 
 	handlers.InitRoutes(app)
 
-	fmt.Println(service.GenerateHashPassword("password"))
-
 	log.Fatal(app.Listen(fmt.Sprintf("%s:%s", cfg.Host, cfg.Port)))
-
 }

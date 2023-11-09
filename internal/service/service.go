@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/blazee5/finance-tracker/internal/domain"
 	"github.com/blazee5/finance-tracker/internal/models"
 	storage "github.com/blazee5/finance-tracker/internal/storage/mongodb"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,16 +20,17 @@ type Storage struct {
 
 //go:generate mockery --name UserDAO
 type UserDAO interface {
-	Create(ctx context.Context, user models.User) (interface{}, error)
+	Create(ctx context.Context, user models.User) (string, error)
 	GetUser(ctx context.Context, email, password string) (models.User, error)
+	AddBalance(ctx context.Context, userId string, amount float64) error
 }
 
 //go:generate mockery --name TransactionDAO
 type TransactionDAO interface {
-	Create(ctx context.Context, transaction models.Transaction) (interface{}, error)
+	Create(ctx context.Context, transaction domain.Transaction) (string, error)
 	GetTransactions(ctx context.Context, userID string) ([]models.Transaction, error)
 	GetTransaction(ctx context.Context, id string) (models.Transaction, error)
-	Update(ctx context.Context, transaction models.Transaction) (int64, error)
+	Update(ctx context.Context, id string, transaction domain.Transaction) (int, error)
 	Delete(ctx context.Context, id string) error
 	GetAnalyze(ctx context.Context, id string) ([]models.Analyze, error)
 }

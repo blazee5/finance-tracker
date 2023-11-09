@@ -2,7 +2,7 @@ package handler
 
 import (
 	"errors"
-	"github.com/blazee5/finance-tracker/internal/models"
+	"github.com/blazee5/finance-tracker/internal/domain"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,12 +15,16 @@ import (
 // @Produce json
 // @Authorization BearerAuth "Authorization"
 // @Success 200 {object} []models.Transaction
-// @Router /api/transactions/{userId} [get]
+// @Router /api/transactions [get]
 func (h *Handler) GetTransactions(c *fiber.Ctx) error {
-	transaction, err := h.Service.GetTransactions(c.Params("userId"))
+	userId := c.Locals("userId").(string)
+
+	transaction, err := h.Service.GetTransactions(c.Context(), userId)
+
 	if err != nil {
 		return err
 	}
+
 	return c.Status(fiber.StatusOK).JSON(transaction)
 }
 
@@ -34,15 +38,15 @@ func (h *Handler) GetTransactions(c *fiber.Ctx) error {
 // @Success 201 {object} string
 // @Router /api/transactions [post]
 func (h *Handler) CreateTransaction(c *fiber.Ctx) error {
-	var input models.Transaction
+	var input domain.Transaction
+
+	userId := c.Locals("userId").(string)
 
 	if err := c.BodyParser(&input); err != nil {
 		return err
 	}
 
-	input.UserID = c.Locals("userId").(string)
-
-	id, err := h.Service.CreateTransaction(input)
+	id, err := h.Service.CreateTransaction(c.Context(), userId, input)
 	if err != nil {
 		return err
 	}
@@ -61,17 +65,20 @@ func (h *Handler) CreateTransaction(c *fiber.Ctx) error {
 // @Success 200 {object} models.Transaction
 // @Router /api/transaction/{id} [get]
 func (h *Handler) GetTransaction(c *fiber.Ctx) error {
-	transaction, err := h.Service.GetTransaction(c.Params("id"))
+	id := c.Params("id")
+
+	transaction, err := h.Service.GetTransaction(c.Context(), id)
 
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return c.Status(fiber.StatusNotFound).SendString("transaction not found")
 	}
+
 	if err != nil {
 		log.Infof("GetTransaction err: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
 	}
 
-	if transaction.UserID != c.Locals("userId").(string) {
+	if transaction.User.ID != c.Locals("userId").(string) {
 		return c.Status(fiber.StatusForbidden).SendString("Forbidden")
 	}
 
@@ -93,27 +100,27 @@ func (h *Handler) GetTransaction(c *fiber.Ctx) error {
 // @Success 200 {object} string
 // @Router /api/transactions/{id} [put]
 func (h *Handler) UpdateTransaction(c *fiber.Ctx) error {
-	var input models.Transaction
+	var input domain.Transaction
 
-	input.ID = c.Params("id")
+	id := c.Params("id")
 
 	if err := c.BodyParser(&input); err != nil {
 		return err
 	}
 
-	transaction, err := h.Service.GetTransaction(c.Params("id"))
+	transaction, err := h.Service.GetTransaction(c.Context(), id)
 
-	if transaction.UserID != c.Locals("userId").(string) {
+	if transaction.User.ID != c.Locals("userId").(string) {
 		return c.Status(fiber.StatusForbidden).SendString("Forbidden")
 	}
 
-	id, err := h.Service.UpdateTransaction(input)
+	_, err = h.Service.UpdateTransaction(c.Context(), id, input)
 
 	if err != nil {
 		return err
 	}
 
-	if transaction.UserID != c.Locals("userId").(string) {
+	if transaction.User.ID != c.Locals("userId").(string) {
 		return c.Status(fiber.StatusForbidden).SendString("Forbidden")
 	}
 
@@ -131,15 +138,19 @@ func (h *Handler) UpdateTransaction(c *fiber.Ctx) error {
 // @Success 200 {object} string
 // @Router /api/transactions/{id} [delete]
 func (h *Handler) DeleteTransaction(c *fiber.Ctx) error {
-	transaction, err := h.Service.GetTransaction(c.Params("id"))
+	id := c.Params("id")
+
+	transaction, err := h.Service.GetTransaction(c.Context(), id)
+
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).SendString("transaction not found")
 	}
-	if c.Locals("userId") != transaction.UserID {
+
+	if c.Locals("userId") != transaction.User.ID {
 		return c.Status(fiber.StatusForbidden).SendString("Forbidden")
 	}
 
-	err = h.Service.DeleteTransaction(c.Params("id"))
+	err = h.Service.DeleteTransaction(c.Context(), c.Params("id"))
 
 	if err != nil {
 		return err
@@ -151,7 +162,9 @@ func (h *Handler) DeleteTransaction(c *fiber.Ctx) error {
 }
 
 func (h *Handler) AnalyzeTransactions(c *fiber.Ctx) error {
-	res, err := h.Service.AnalyzeTransactions(c.Locals("userId").(string))
+	userId := c.Locals("userId").(string)
+
+	res, err := h.Service.AnalyzeTransactions(c.Context(), userId)
 
 	if err != nil {
 		return err

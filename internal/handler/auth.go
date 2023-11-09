@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/blazee5/finance-tracker/internal/models"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 )
 
 // @Summary Sign up
@@ -29,13 +30,15 @@ func (h *Handler) SignUp(c *fiber.Ctx) error {
 		return err
 	}
 
-	id, err := h.Service.CreateUser(input)
+	token, err := h.Service.CreateUser(c.Context(), input)
 
 	if err != nil {
 		return err
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(id)
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"token": token,
+	})
 }
 
 // @Summary Sign in
@@ -56,8 +59,10 @@ func (h *Handler) SignIn(c *fiber.Ctx) error {
 		return err
 	}
 
-	token, err := h.Service.GenerateToken(input.Email, input.Password)
+	token, err := h.Service.GenerateToken(c.Context(), input.Email, input.Password)
+
 	if err != nil {
+		log.Infof("error while sign in%s", err)
 		return c.Status(fiber.StatusUnauthorized).JSON("invalid credentials")
 	}
 
