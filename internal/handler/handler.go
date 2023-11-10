@@ -2,18 +2,20 @@ package handler
 
 import (
 	"github.com/blazee5/finance-tracker/internal/service"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
 	"go.uber.org/zap"
 )
 
 type Handler struct {
-	log     *zap.SugaredLogger
-	service *service.Service
+	log       *zap.SugaredLogger
+	service   *service.Service
+	validator *validator.Validate
 }
 
-func NewHandler(log *zap.SugaredLogger, service *service.Service) *Handler {
-	return &Handler{log: log, service: service}
+func NewHandler(log *zap.SugaredLogger, service *service.Service, validator *validator.Validate) *Handler {
+	return &Handler{log: log, service: service, validator: validator}
 }
 
 func (h *Handler) InitRoutes(app *fiber.App) {

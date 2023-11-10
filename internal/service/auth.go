@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/blazee5/finance-tracker/internal/domain"
 	"github.com/blazee5/finance-tracker/internal/models"
 	"github.com/blazee5/finance-tracker/internal/repository"
 	"github.com/blazee5/finance-tracker/lib/auth"
@@ -17,7 +18,7 @@ func NewAuthService(log *zap.SugaredLogger, repo *repository.Repository) *AuthSe
 	return &AuthService{log: log, repo: repo}
 }
 
-func (s *AuthService) CreateUser(ctx context.Context, user models.User) (string, error) {
+func (s *AuthService) CreateUser(ctx context.Context, user domain.SignUpRequest) (string, error) {
 	user.Password = auth.GenerateHashPassword(user.Password)
 
 	id, err := s.repo.User.Create(ctx, user)

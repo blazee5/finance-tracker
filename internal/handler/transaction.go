@@ -3,30 +3,12 @@ package handler
 import (
 	"errors"
 	"github.com/blazee5/finance-tracker/internal/domain"
+	"github.com/blazee5/finance-tracker/lib/response"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-// @Summary Get transactions
-// @Description Get transactions
-// @Tags transactions
-// @Accept json
-// @Produce json
-// @Authorization BearerAuth "Authorization"
-// @Success 200 {object} []models.Transaction
-// @Router /api/transactions [get]
-func (h *Handler) GetTransactions(c *fiber.Ctx) error {
-	userId := c.Locals("userId").(string)
-
-	transaction, err := h.service.Transaction.GetTransactions(c.Context(), userId)
-
-	if err != nil {
-		return err
-	}
-
-	return c.Status(fiber.StatusOK).JSON(transaction)
-}
 
 // @Summary Create transaction
 // @Description Create transaction
@@ -48,6 +30,14 @@ func (h *Handler) CreateTransaction(c *fiber.Ctx) error {
 		})
 	}
 
+	if err := h.validator.Struct(&input); err != nil {
+		validateErr := err.(validator.ValidationErrors)
+
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": response.ValidationError(validateErr),
+		})
+	}
+
 	id, err := h.service.Transaction.CreateTransaction(c.Context(), userId, input)
 
 	if err != nil {
@@ -57,7 +47,26 @@ func (h *Handler) CreateTransaction(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(id)
+}
 
+// @Summary Get transactions
+// @Description Get transactions
+// @Tags transactions
+// @Accept json
+// @Produce json
+// @Authorization BearerAuth "Authorization"
+// @Success 200 {object} []models.Transaction
+// @Router /api/transactions [get]
+func (h *Handler) GetTransactions(c *fiber.Ctx) error {
+	userId := c.Locals("userId").(string)
+
+	transaction, err := h.service.Transaction.GetTransactions(c.Context(), userId)
+
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(transaction)
 }
 
 // @Summary Get transaction
@@ -112,6 +121,14 @@ func (h *Handler) UpdateTransaction(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&input); err != nil {
 		return err
+	}
+
+	if err := h.validator.Struct(&input); err != nil {
+		validateErr := err.(validator.ValidationErrors)
+
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": response.ValidationError(validateErr),
+		})
 	}
 
 	transaction, err := h.service.Transaction.GetTransaction(c.Context(), id)

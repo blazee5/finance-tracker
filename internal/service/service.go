@@ -9,7 +9,7 @@ import (
 )
 
 type Auth interface {
-	CreateUser(ctx context.Context, user models.User) (string, error)
+	CreateUser(ctx context.Context, user domain.SignUpRequest) (string, error)
 	GenerateToken(ctx context.Context, email, password string) (string, error)
 	GetUserById(ctx context.Context, id string) (models.ShortUser, error)
 }

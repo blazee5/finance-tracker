@@ -2,7 +2,8 @@ package handler
 
 import (
 	"github.com/blazee5/finance-tracker/internal/domain"
-	"github.com/blazee5/finance-tracker/internal/models"
+	"github.com/blazee5/finance-tracker/lib/response"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -24,10 +25,18 @@ import (
 // @Failure 500 {string} string "internal server error"
 // @Router /auth/signup [post]
 func (h *Handler) SignUp(c *fiber.Ctx) error {
-	var input models.User
+	var input domain.SignUpRequest
 
 	if err := c.BodyParser(&input); err != nil {
 		return err
+	}
+
+	if err := h.validator.Struct(&input); err != nil {
+		validateErr := err.(validator.ValidationErrors)
+
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": response.ValidationError(validateErr),
+		})
 	}
 
 	token, err := h.service.Auth.CreateUser(c.Context(), input)
@@ -53,10 +62,18 @@ func (h *Handler) SignUp(c *fiber.Ctx) error {
 // @Failure 500 {string} string "internal server error"
 // @Router /auth/signin [post]
 func (h *Handler) SignIn(c *fiber.Ctx) error {
-	var input models.User
+	var input domain.SignInRequest
 
 	if err := c.BodyParser(&input); err != nil {
 		return err
+	}
+
+	if err := h.validator.Struct(&input); err != nil {
+		validateErr := err.(validator.ValidationErrors)
+
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": response.ValidationError(validateErr),
+		})
 	}
 
 	token, err := h.service.Auth.GenerateToken(c.Context(), input.Email, input.Password)
@@ -71,6 +88,15 @@ func (h *Handler) SignIn(c *fiber.Ctx) error {
 	})
 }
 
+// @Summary Get User
+// @Tags auth
+// @Description get user by id
+// @ID get-user
+// @Accept  json
+// @Produce  json
+// @Success 200 {string} string	"ok"
+// @Failure 500 {string} string "internal server error"
+// @Router /api/user [post]
 func (h *Handler) GetUser(c *fiber.Ctx) error {
 	userId := c.Locals("userId").(string)
 

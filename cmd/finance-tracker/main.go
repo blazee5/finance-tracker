@@ -8,6 +8,7 @@ import (
 	"github.com/blazee5/finance-tracker/internal/repository"
 	"github.com/blazee5/finance-tracker/internal/repository/mongodb"
 	"github.com/blazee5/finance-tracker/internal/service"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"go.uber.org/zap"
@@ -34,9 +35,10 @@ func main() {
 	app := fiber.New()
 	app.Use(cors.New())
 
+	validate := validator.New()
 	repo := repository.NewRepository(cfg, db)
 	services := service.NewService(log, repo)
-	handlers := handler.NewHandler(log, services)
+	handlers := handler.NewHandler(log, services, validate)
 
 	handlers.InitRoutes(app)
 

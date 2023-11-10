@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"github.com/blazee5/finance-tracker/internal/config"
+	"github.com/blazee5/finance-tracker/internal/domain"
 	"github.com/blazee5/finance-tracker/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -19,8 +20,8 @@ func NewUserRepository(cfg *config.Config, client *mongo.Client) *UserRepository
 	}
 }
 
-func (repo *UserRepository) Create(ctx context.Context, user models.User) (string, error) {
-	res, err := repo.db.InsertOne(ctx, models.User{Name: user.Name, Email: user.Email, Password: user.Password})
+func (repo *UserRepository) Create(ctx context.Context, input domain.SignUpRequest) (string, error) {
+	res, err := repo.db.InsertOne(ctx, models.User{Name: input.Name, Email: input.Email, Password: input.Password})
 
 	if err != nil {
 		return "", err

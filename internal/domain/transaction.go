@@ -3,10 +3,8 @@ package domain
 import "time"
 
 type Transaction struct {
-	ID          string    `json:"id"`
-	UserID      string    `json:"user_id"`
-	Description string    `json:"description"`
-	Amount      float64   `json:"amount"`
-	Type        string    `json:"type"`
+	Description string    `json:"description" validate:"required"`
+	Amount      float64   `json:"amount" validate:"required,number"`
+	Type        string    `json:"type" validate:"required"`
 	Date        time.Time `json:"date"`
 }

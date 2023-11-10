@@ -16,7 +16,7 @@ type Repository struct {
 }
 
 type UserRepository interface {
-	Create(ctx context.Context, user models.User) (string, error)
+	Create(ctx context.Context, input domain.SignUpRequest) (string, error)
 	GetUser(ctx context.Context, email, password string) (models.User, error)
 	GetUserById(ctx context.Context, id string) (models.ShortUser, error)
 }
