@@ -88,6 +88,7 @@ func (repo *TransactionRepository) Update(ctx context.Context, id string, transa
 			{"type", transaction.Type},
 			{"amount", transaction.Amount},
 			{"description", transaction.Description},
+			{"created_at", transaction.Date},
 		}}})
 
 	if err != nil {
