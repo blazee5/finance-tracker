@@ -19,7 +19,7 @@ import (
 func (h *Handler) GetTransactions(c *fiber.Ctx) error {
 	userId := c.Locals("userId").(string)
 
-	transaction, err := h.service.GetTransactions(c.Context(), userId)
+	transaction, err := h.service.Transaction.GetTransactions(c.Context(), userId)
 
 	if err != nil {
 		return err
@@ -46,7 +46,7 @@ func (h *Handler) CreateTransaction(c *fiber.Ctx) error {
 		return err
 	}
 
-	id, err := h.service.CreateTransaction(c.Context(), userId, input)
+	id, err := h.service.Transaction.CreateTransaction(c.Context(), userId, input)
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func (h *Handler) CreateTransaction(c *fiber.Ctx) error {
 func (h *Handler) GetTransaction(c *fiber.Ctx) error {
 	id := c.Params("id")
 
-	transaction, err := h.service.GetTransaction(c.Context(), id)
+	transaction, err := h.service.Transaction.GetTransaction(c.Context(), id)
 
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return c.Status(fiber.StatusNotFound).SendString("transaction not found")
@@ -109,13 +109,13 @@ func (h *Handler) UpdateTransaction(c *fiber.Ctx) error {
 		return err
 	}
 
-	transaction, err := h.service.GetTransaction(c.Context(), id)
+	transaction, err := h.service.Transaction.GetTransaction(c.Context(), id)
 
 	if userId != transaction.User.ID.Hex() {
 		return c.Status(fiber.StatusForbidden).SendString("Forbidden")
 	}
 
-	_, err = h.service.UpdateTransaction(c.Context(), id, input)
+	_, err = h.service.Transaction.UpdateTransaction(c.Context(), id, input)
 
 	if err != nil {
 		return err
@@ -138,7 +138,7 @@ func (h *Handler) DeleteTransaction(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userId := c.Locals("userId").(string)
 
-	transaction, err := h.service.GetTransaction(c.Context(), id)
+	transaction, err := h.service.Transaction.GetTransaction(c.Context(), id)
 
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).SendString("transaction not found")
@@ -148,7 +148,7 @@ func (h *Handler) DeleteTransaction(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusForbidden).SendString("Forbidden")
 	}
 
-	err = h.service.DeleteTransaction(c.Context(), id)
+	err = h.service.Transaction.DeleteTransaction(c.Context(), id)
 
 	if err != nil {
 		return err
@@ -171,7 +171,7 @@ func (h *Handler) DeleteTransaction(c *fiber.Ctx) error {
 func (h *Handler) AnalyzeTransactions(c *fiber.Ctx) error {
 	userId := c.Locals("userId").(string)
 
-	res, err := h.service.AnalyzeTransactions(c.Context(), userId)
+	res, err := h.service.Transaction.AnalyzeTransactions(c.Context(), userId)
 
 	if err != nil {
 		return err

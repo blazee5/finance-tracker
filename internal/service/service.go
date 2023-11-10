@@ -4,43 +4,35 @@ import (
 	"context"
 	"github.com/blazee5/finance-tracker/internal/domain"
 	"github.com/blazee5/finance-tracker/internal/models"
-	storage "github.com/blazee5/finance-tracker/internal/storage/mongodb"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/blazee5/finance-tracker/internal/repository"
+	"go.uber.org/zap"
 )
 
-type Service struct {
-	Storage *Storage
-}
-
-type Storage struct {
-	Db *mongo.Client
-	UserDAO
-	TransactionDAO
-}
-
-//go:generate mockery --name UserDAO
-type UserDAO interface {
-	Create(ctx context.Context, user models.User) (string, error)
-	GetUser(ctx context.Context, email, password string) (models.User, error)
+type Auth interface {
+	CreateUser(ctx context.Context, user models.User) (string, error)
+	GenerateToken(ctx context.Context, email, password string) (string, error)
 	GetUserById(ctx context.Context, id string) (models.ShortUser, error)
 }
 
-//go:generate mockery --name TransactionDAO
-type TransactionDAO interface {
-	Create(ctx context.Context, user models.ShortUser, transaction domain.Transaction) (string, error)
-	GetTransactions(ctx context.Context, userID string) ([]models.Transaction, error)
+type Transaction interface {
+	GetTransactions(ctx context.Context, id string) ([]models.Transaction, error)
+	CreateTransaction(ctx context.Context, userId string, transaction domain.Transaction) (string, error)
 	GetTransaction(ctx context.Context, id string) (models.Transaction, error)
-	Update(ctx context.Context, id string, transaction domain.Transaction) (int, error)
-	Delete(ctx context.Context, id string) error
-	GetAnalyze(ctx context.Context, id string) (models.Analyze, error)
+	UpdateTransaction(ctx context.Context, id string, transaction domain.Transaction) (int, error)
+	DeleteTransaction(ctx context.Context, id string) error
+	AnalyzeTransactions(ctx context.Context, id string) (models.Analyze, error)
 }
 
-func NewService(storage *storage.Storage) *Service {
+type Service struct {
+	log         *zap.SugaredLogger
+	repo        *repository.Repository
+	Auth        Auth
+	Transaction Transaction
+}
+
+func NewService(log *zap.SugaredLogger, repo *repository.Repository) *Service {
 	return &Service{
-		Storage: &Storage{
-			Db:             storage.Db,
-			UserDAO:        storage.UserDAO,
-			TransactionDAO: storage.TransactionDAO,
-		},
+		Auth:        NewAuthService(log, repo),
+		Transaction: NewTransactionService(log, repo),
 	}
 }

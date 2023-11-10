@@ -2,19 +2,31 @@ package mongodb
 
 import (
 	"context"
+	"github.com/blazee5/finance-tracker/internal/config"
 	"github.com/blazee5/finance-tracker/internal/domain"
 	"github.com/blazee5/finance-tracker/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"time"
 )
 
-func (db *TransactionDAO) Create(ctx context.Context, user models.ShortUser, transaction domain.Transaction) (string, error) {
+type TransactionRepository struct {
+	db *mongo.Collection
+}
+
+func NewTransactionRepository(cfg *config.Config, client *mongo.Client) *TransactionRepository {
+	return &TransactionRepository{
+		db: client.Database(cfg.DBName).Collection("transactions"),
+	}
+}
+
+func (repo *TransactionRepository) Create(ctx context.Context, user models.ShortUser, transaction domain.Transaction) (string, error) {
 	if transaction.Date.IsZero() {
 		transaction.Date = time.Now()
 	}
 
-	res, err := db.c.InsertOne(ctx, models.Transaction{User: user, Type: transaction.Type, Amount: transaction.Amount, Description: transaction.Description, CreatedAt: transaction.Date})
+	res, err := repo.db.InsertOne(ctx, models.Transaction{User: user, Type: transaction.Type, Amount: transaction.Amount, Description: transaction.Description, CreatedAt: transaction.Date})
 
 	if err != nil {
 		return "", err
@@ -23,7 +35,7 @@ func (db *TransactionDAO) Create(ctx context.Context, user models.ShortUser, tra
 	return res.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func (db *TransactionDAO) GetTransactions(ctx context.Context, id string) ([]models.Transaction, error) {
+func (repo *TransactionRepository) GetTransactions(ctx context.Context, id string) ([]models.Transaction, error) {
 	var transactions []models.Transaction
 
 	objectId, err := primitive.ObjectIDFromHex(id)
@@ -32,7 +44,7 @@ func (db *TransactionDAO) GetTransactions(ctx context.Context, id string) ([]mod
 		return nil, err
 	}
 
-	cursor, err := db.c.Find(ctx, bson.D{{"user._id", objectId}})
+	cursor, err := repo.db.Find(ctx, bson.D{{"user._id", objectId}})
 
 	if err != nil {
 		return nil, err
@@ -45,7 +57,7 @@ func (db *TransactionDAO) GetTransactions(ctx context.Context, id string) ([]mod
 	return transactions, nil
 }
 
-func (db *TransactionDAO) GetTransaction(ctx context.Context, id string) (models.Transaction, error) {
+func (repo *TransactionRepository) GetTransaction(ctx context.Context, id string) (models.Transaction, error) {
 	var transaction models.Transaction
 
 	objectId, err := primitive.ObjectIDFromHex(id)
@@ -54,7 +66,7 @@ func (db *TransactionDAO) GetTransaction(ctx context.Context, id string) (models
 		return models.Transaction{}, err
 	}
 
-	err = db.c.FindOne(ctx, bson.D{{"_id", objectId}}).Decode(&transaction)
+	err = repo.db.FindOne(ctx, bson.D{{"_id", objectId}}).Decode(&transaction)
 
 	if err != nil {
 		return models.Transaction{}, err
@@ -63,14 +75,14 @@ func (db *TransactionDAO) GetTransaction(ctx context.Context, id string) (models
 	return transaction, nil
 }
 
-func (db *TransactionDAO) Update(ctx context.Context, id string, transaction domain.Transaction) (int, error) {
+func (repo *TransactionRepository) Update(ctx context.Context, id string, transaction domain.Transaction) (int, error) {
 	objectId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
 		return 0, err
 	}
 
-	res, err := db.c.UpdateOne(ctx, bson.D{
+	res, err := repo.db.UpdateOne(ctx, bson.D{
 		{"_id", objectId}},
 		bson.D{{"$set", bson.D{
 			{"type", transaction.Type},
@@ -85,14 +97,14 @@ func (db *TransactionDAO) Update(ctx context.Context, id string, transaction dom
 	return int(res.ModifiedCount), nil
 }
 
-func (db *TransactionDAO) Delete(ctx context.Context, id string) error {
+func (repo *TransactionRepository) Delete(ctx context.Context, id string) error {
 	objectId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
 		return err
 	}
 
-	_, err = db.c.DeleteOne(ctx, bson.D{{"_id", objectId}})
+	_, err = repo.db.DeleteOne(ctx, bson.D{{"_id", objectId}})
 
 	if err != nil {
 		return err
@@ -101,7 +113,7 @@ func (db *TransactionDAO) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (db *TransactionDAO) GetAnalyze(ctx context.Context, id string) (models.Analyze, error) {
+func (repo *TransactionRepository) GetAnalyze(ctx context.Context, id string) (models.Analyze, error) {
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return models.Analyze{}, err
@@ -130,7 +142,7 @@ func (db *TransactionDAO) GetAnalyze(ctx context.Context, id string) (models.Ana
 
 	var analyze models.Analyze
 
-	cursor, err := db.c.Aggregate(ctx, pipeline)
+	cursor, err := repo.db.Aggregate(ctx, pipeline)
 	if err != nil {
 		return models.Analyze{}, err
 	}

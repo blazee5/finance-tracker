@@ -30,7 +30,7 @@ func (h *Handler) SignUp(c *fiber.Ctx) error {
 		return err
 	}
 
-	token, err := h.service.CreateUser(c.Context(), input)
+	token, err := h.service.Auth.CreateUser(c.Context(), input)
 
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func (h *Handler) SignIn(c *fiber.Ctx) error {
 		return err
 	}
 
-	token, err := h.service.GenerateToken(c.Context(), input.Email, input.Password)
+	token, err := h.service.Auth.GenerateToken(c.Context(), input.Email, input.Password)
 
 	if err != nil {
 		h.log.Infof("error while sign in: %v", err)
@@ -74,7 +74,7 @@ func (h *Handler) SignIn(c *fiber.Ctx) error {
 func (h *Handler) GetUser(c *fiber.Ctx) error {
 	userId := c.Locals("userId").(string)
 
-	user, err := h.service.GetUserById(c.Context(), userId)
+	user, err := h.service.Auth.GetUserById(c.Context(), userId)
 
 	if err != nil {
 		h.log.Infof("error while get user: %v", err)
