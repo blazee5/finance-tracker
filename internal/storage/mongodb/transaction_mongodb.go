@@ -8,17 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (db *TransactionDAO) Create(ctx context.Context, transaction domain.Transaction) (string, error) {
-	var user models.User
-
-	objectId, err := primitive.ObjectIDFromHex(transaction.UserID)
-
-	err = db.c.FindOne(ctx, bson.D{{"_id", objectId}}).Decode(&user)
-
-	if err != nil {
-		return "", err
-	}
-
+func (db *TransactionDAO) Create(ctx context.Context, user models.User, transaction domain.Transaction) (string, error) {
 	res, err := db.c.InsertOne(ctx, models.Transaction{User: user, Type: transaction.Type, Amount: transaction.Amount, Description: transaction.Description})
 
 	if err != nil {
@@ -69,7 +59,7 @@ func (db *TransactionDAO) GetTransaction(ctx context.Context, id string) (models
 }
 
 func (db *TransactionDAO) Update(ctx context.Context, id string, transaction domain.Transaction) (int, error) {
-	objectId, err := primitive.ObjectIDFromHex(transaction.ID)
+	objectId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
 		return 0, err
@@ -106,36 +96,45 @@ func (db *TransactionDAO) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (db *TransactionDAO) GetAnalyze(ctx context.Context, id string) ([]models.Analyze, error) {
-	var analyze []models.Analyze
-
+func (db *TransactionDAO) GetAnalyze(ctx context.Context, id string) (models.Analyze, error) {
 	objectId, err := primitive.ObjectIDFromHex(id)
-
 	if err != nil {
-		return []models.Analyze{}, err
+		return models.Analyze{}, err
 	}
 
-	cursor, err := db.c.Aggregate(ctx, []bson.M{
-		{"$match": bson.M{"user._id": objectId}},
-		{"$group": bson.M{
-			"_id":           nil,
-			"total_income":  bson.M{"$sum": bson.M{"$cond": []interface{}{bson.M{"$eq": []interface{}{"$type", "income"}}, "$amount", 0}}},
-			"total_expense": bson.M{"$sum": bson.M{"$cond": []interface{}{bson.M{"$eq": []interface{}{"$type", "expense"}}, "$amount", 0}}},
-		}},
-		{"$project": bson.M{
-			"_id":           0,
-			"total_income":  1,
-			"total_expense": 1,
-			"total":         bson.M{"$subtract": []interface{}{"$total_income", "$total_expense"}},
-		}},
-	})
-
-	if err != nil {
-		return nil, err
+	pipeline := []bson.D{
+		{
+			{"$match", bson.M{"user._id": objectId}},
+		},
+		{
+			{"$group", bson.D{
+				{"_id", 0},
+				{"total_income", bson.D{{"$sum", bson.D{{"$cond", bson.A{bson.D{{"$eq", bson.A{"$type", "income"}}}, "$amount", 0}}}}}},
+				{"total_expense", bson.D{{"$sum", bson.D{{"$cond", bson.A{bson.D{{"$eq", bson.A{"$type", "expense"}}}, "$amount", 0}}}}}},
+			}},
+		},
+		{
+			{"$project", bson.D{
+				{"_id", 0},
+				{"total_income", 1},
+				{"total_expense", 1},
+				{"total", bson.D{{"$subtract", bson.A{"$total_income", "$total_expense"}}}},
+			}},
+		},
 	}
 
-	if err = cursor.All(ctx, &analyze); err != nil {
-		return nil, err
+	var analyze models.Analyze
+
+	cursor, err := db.c.Aggregate(ctx, pipeline)
+	if err != nil {
+		return models.Analyze{}, err
+	}
+	defer cursor.Close(ctx)
+
+	if cursor.Next(ctx) {
+		if err := cursor.Decode(&analyze); err != nil {
+			return models.Analyze{}, err
+		}
 	}
 
 	return analyze, nil

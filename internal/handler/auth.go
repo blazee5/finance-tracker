@@ -1,9 +1,9 @@
 package handler
 
 import (
+	"github.com/blazee5/finance-tracker/internal/domain"
 	"github.com/blazee5/finance-tracker/internal/models"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/log"
 )
 
 // @Summary Sign up
@@ -30,7 +30,7 @@ func (h *Handler) SignUp(c *fiber.Ctx) error {
 		return err
 	}
 
-	token, err := h.Service.CreateUser(c.Context(), input)
+	token, err := h.service.CreateUser(c.Context(), input)
 
 	if err != nil {
 		return err
@@ -59,14 +59,34 @@ func (h *Handler) SignIn(c *fiber.Ctx) error {
 		return err
 	}
 
-	token, err := h.Service.GenerateToken(c.Context(), input.Email, input.Password)
+	token, err := h.service.GenerateToken(c.Context(), input.Email, input.Password)
 
 	if err != nil {
-		log.Infof("error while sign in%s", err)
+		h.log.Infof("error while sign in: %v", err)
 		return c.Status(fiber.StatusUnauthorized).JSON("invalid credentials")
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"token": token,
+	})
+}
+
+func (h *Handler) GetUser(c *fiber.Ctx) error {
+	userId := c.Locals("userId").(string)
+
+	user, err := h.service.GetUserById(c.Context(), userId)
+
+	if err != nil {
+		h.log.Infof("error while get user: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "server error",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(domain.User{
+		ID:      user.ID.Hex(),
+		Name:    user.Name,
+		Email:   user.Email,
+		Balance: user.Balance,
 	})
 }

@@ -22,17 +22,18 @@ type Storage struct {
 type UserDAO interface {
 	Create(ctx context.Context, user models.User) (string, error)
 	GetUser(ctx context.Context, email, password string) (models.User, error)
+	GetUserById(ctx context.Context, id string) (models.User, error)
 	AddBalance(ctx context.Context, userId string, amount float64) error
 }
 
 //go:generate mockery --name TransactionDAO
 type TransactionDAO interface {
-	Create(ctx context.Context, transaction domain.Transaction) (string, error)
+	Create(ctx context.Context, user models.User, transaction domain.Transaction) (string, error)
 	GetTransactions(ctx context.Context, userID string) ([]models.Transaction, error)
 	GetTransaction(ctx context.Context, id string) (models.Transaction, error)
 	Update(ctx context.Context, id string, transaction domain.Transaction) (int, error)
 	Delete(ctx context.Context, id string) error
-	GetAnalyze(ctx context.Context, id string) ([]models.Analyze, error)
+	GetAnalyze(ctx context.Context, id string) (models.Analyze, error)
 }
 
 func NewService(storage *storage.Storage) *Service {

@@ -4,14 +4,16 @@ import (
 	"github.com/blazee5/finance-tracker/internal/service"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
+	"go.uber.org/zap"
 )
 
 type Handler struct {
-	Service *service.Service
+	log     *zap.SugaredLogger
+	service *service.Service
 }
 
-func NewHandler(service *service.Service) *Handler {
-	return &Handler{Service: service}
+func NewHandler(log *zap.SugaredLogger, service *service.Service) *Handler {
+	return &Handler{log: log, service: service}
 }
 
 func (h *Handler) InitRoutes(app *fiber.App) {
@@ -23,12 +25,20 @@ func (h *Handler) InitRoutes(app *fiber.App) {
 
 	api := fiber.Router(app).Group("/api")
 	{
-		api.Get("/transactions/analyze", h.userIdentity, h.AnalyzeTransactions)
-		api.Get("/transactions/", h.userIdentity, h.GetTransactions)
-		api.Post("/transactions", h.userIdentity, h.CreateTransaction)
-		api.Get("/transaction/:id", h.userIdentity, h.GetTransaction)
-		api.Put("/transactions/:id", h.userIdentity, h.UpdateTransaction)
-		api.Delete("/transactions/:id", h.userIdentity, h.DeleteTransaction)
+		user := api.Group("/user")
+		{
+			user.Get("/", h.userIdentity, h.GetUser)
+		}
+
+		transactions := api.Group("/transactions")
+		{
+			transactions.Get("/analyze", h.userIdentity, h.AnalyzeTransactions)
+			transactions.Get("/", h.userIdentity, h.GetTransactions)
+			transactions.Post("/", h.userIdentity, h.CreateTransaction)
+			transactions.Get("/:id", h.userIdentity, h.GetTransaction)
+			transactions.Put("/:id", h.userIdentity, h.UpdateTransaction)
+			transactions.Delete("/:id", h.userIdentity, h.DeleteTransaction)
+		}
 	}
 
 	app.Get("/swagger/*", swagger.HandlerDefault)

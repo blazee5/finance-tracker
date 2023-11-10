@@ -37,7 +37,7 @@ func main() {
 	transactionRepo, err := storage.NewTransactionDAO(db.Db, cfg)
 	newStorage := &storage.Storage{Db: db.Db, UserDAO: userRepo, TransactionDAO: transactionRepo}
 	services := service.NewService(newStorage)
-	handlers := handler.NewHandler(services)
+	handlers := handler.NewHandler(log, services)
 
 	handlers.InitRoutes(app)
 

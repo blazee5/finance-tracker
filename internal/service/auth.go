@@ -25,5 +25,9 @@ func (s *Service) GenerateToken(ctx context.Context, email, password string) (st
 		return "", err
 	}
 
-	return auth.GenerateToken(user.ID)
+	return auth.GenerateToken(user.ID.Hex())
+}
+
+func (s *Service) GetUserById(ctx context.Context, id string) (models.User, error) {
+	return s.Storage.GetUserById(ctx, id)
 }

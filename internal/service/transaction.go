@@ -11,13 +11,19 @@ func (s *Service) GetTransactions(ctx context.Context, id string) ([]models.Tran
 }
 
 func (s *Service) CreateTransaction(ctx context.Context, userId string, transaction domain.Transaction) (string, error) {
-	id, err := s.Storage.TransactionDAO.Create(context.Background(), transaction)
+	user, err := s.Storage.GetUserById(ctx, userId)
 
 	if err != nil {
 		return "", err
 	}
 
-	err = s.Storage.UserDAO.AddBalance(ctx, transaction.UserID, transaction.Amount)
+	id, err := s.Storage.TransactionDAO.Create(ctx, user, transaction)
+
+	if err != nil {
+		return "", err
+	}
+
+	err = s.Storage.UserDAO.AddBalance(ctx, userId, transaction.Amount)
 
 	if err != nil {
 		return "", err
@@ -38,6 +44,6 @@ func (s *Service) DeleteTransaction(ctx context.Context, id string) error {
 	return s.Storage.TransactionDAO.Delete(ctx, id)
 }
 
-func (s *Service) AnalyzeTransactions(ctx context.Context, id string) ([]models.Analyze, error) {
+func (s *Service) AnalyzeTransactions(ctx context.Context, id string) (models.Analyze, error) {
 	return s.Storage.TransactionDAO.GetAnalyze(ctx, id)
 }

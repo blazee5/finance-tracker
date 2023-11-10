@@ -25,11 +25,9 @@ func (db *UserDAO) AddBalance(ctx context.Context, userId string, amount float64
 	}
 
 	_, err = db.c.UpdateByID(ctx, objectId, bson.D{
-		{"balance", bson.D{
-			{
-				"$sum", amount,
-			}},
-		},
+		{"$inc", bson.D{
+			{"balance", amount},
+		}},
 	})
 
 	if err != nil {
@@ -46,6 +44,24 @@ func (db *UserDAO) GetUser(ctx context.Context, email, password string) (models.
 		{"email", email},
 		{"password", password},
 	}).Decode(&user)
+
+	if err != nil {
+		return models.User{}, err
+	}
+
+	return user, nil
+}
+
+func (db *UserDAO) GetUserById(ctx context.Context, id string) (models.User, error) {
+	var user models.User
+
+	objectId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return models.User{}, err
+	}
+
+	err = db.c.FindOne(ctx, bson.D{{"_id", objectId}}).Decode(&user)
 
 	if err != nil {
 		return models.User{}, err

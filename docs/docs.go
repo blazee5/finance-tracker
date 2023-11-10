@@ -48,6 +48,30 @@ const docTemplate = `{
             }
         },
         "/api/transactions": {
+            "get": {
+                "description": "Get transactions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transactions"
+                ],
+                "summary": "Get transactions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Transaction"
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Create transaction",
                 "consumes": [
@@ -147,32 +171,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/transactions/{userId}": {
-            "get": {
-                "description": "Get transactions",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "transactions"
-                ],
-                "summary": "Get transactions",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Transaction"
-                            }
                         }
                     }
                 }
@@ -278,7 +276,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "amount": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "description": {
                     "type": "string"
@@ -289,14 +287,17 @@ const docTemplate = `{
                 "type": {
                     "type": "string"
                 },
-                "user_id": {
-                    "type": "string"
+                "user": {
+                    "$ref": "#/definitions/models.User"
                 }
             }
         },
         "models.User": {
             "type": "object",
             "properties": {
+                "balance": {
+                    "type": "number"
+                },
                 "email": {
                     "type": "string"
                 },
