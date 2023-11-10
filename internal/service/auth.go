@@ -28,6 +28,6 @@ func (s *Service) GenerateToken(ctx context.Context, email, password string) (st
 	return auth.GenerateToken(user.ID.Hex())
 }
 
-func (s *Service) GetUserById(ctx context.Context, id string) (models.User, error) {
+func (s *Service) GetUserById(ctx context.Context, id string) (models.ShortUser, error) {
 	return s.Storage.GetUserById(ctx, id)
 }

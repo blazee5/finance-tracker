@@ -84,9 +84,8 @@ func (h *Handler) GetUser(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(domain.User{
-		ID:      user.ID.Hex(),
-		Name:    user.Name,
-		Email:   user.Email,
-		Balance: user.Balance,
+		ID:    user.ID.Hex(),
+		Name:  user.Name,
+		Email: user.Email,
 	})
 }

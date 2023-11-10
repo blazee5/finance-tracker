@@ -103,6 +103,7 @@ func (h *Handler) UpdateTransaction(c *fiber.Ctx) error {
 	var input domain.Transaction
 
 	id := c.Params("id")
+	userId := c.Locals("userId").(string)
 
 	if err := c.BodyParser(&input); err != nil {
 		return err
@@ -110,7 +111,7 @@ func (h *Handler) UpdateTransaction(c *fiber.Ctx) error {
 
 	transaction, err := h.service.GetTransaction(c.Context(), id)
 
-	if transaction.User.ID.Hex() != c.Locals("userId").(string) {
+	if userId != transaction.User.ID.Hex() {
 		return c.Status(fiber.StatusForbidden).SendString("Forbidden")
 	}
 
@@ -120,11 +121,7 @@ func (h *Handler) UpdateTransaction(c *fiber.Ctx) error {
 		return err
 	}
 
-	if transaction.User.ID.Hex() != c.Locals("userId").(string) {
-		return c.Status(fiber.StatusForbidden).SendString("Forbidden")
-	}
-
-	return c.Status(fiber.StatusOK).JSON(id)
+	return c.SendStatus(fiber.StatusOK)
 
 }
 
@@ -139,6 +136,7 @@ func (h *Handler) UpdateTransaction(c *fiber.Ctx) error {
 // @Router /api/transactions/{id} [delete]
 func (h *Handler) DeleteTransaction(c *fiber.Ctx) error {
 	id := c.Params("id")
+	userId := c.Locals("userId").(string)
 
 	transaction, err := h.service.GetTransaction(c.Context(), id)
 
@@ -146,11 +144,11 @@ func (h *Handler) DeleteTransaction(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).SendString("transaction not found")
 	}
 
-	if c.Locals("userId") != transaction.User.ID {
+	if userId != transaction.User.ID.Hex() {
 		return c.Status(fiber.StatusForbidden).SendString("Forbidden")
 	}
 
-	err = h.service.DeleteTransaction(c.Context(), c.Params("id"))
+	err = h.service.DeleteTransaction(c.Context(), id)
 
 	if err != nil {
 		return err
@@ -161,6 +159,15 @@ func (h *Handler) DeleteTransaction(c *fiber.Ctx) error {
 	})
 }
 
+// @Summary Analyze transactions
+// @Description Analyze transactions
+// @Tags transactions
+// @Accept json
+// @Produce json
+// @Authorization BearerAuth "Authorization"
+// @Success 200 {object} string
+// @Failure 500 {object} string
+// @Router /api/transactions/analyze [get]
 func (h *Handler) AnalyzeTransactions(c *fiber.Ctx) error {
 	userId := c.Locals("userId").(string)
 

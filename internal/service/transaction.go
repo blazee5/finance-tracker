@@ -23,12 +23,6 @@ func (s *Service) CreateTransaction(ctx context.Context, userId string, transact
 		return "", err
 	}
 
-	err = s.Storage.UserDAO.AddBalance(ctx, userId, transaction.Amount)
-
-	if err != nil {
-		return "", err
-	}
-
 	return id, nil
 }
 

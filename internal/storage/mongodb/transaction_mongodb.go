@@ -6,10 +6,15 @@ import (
 	"github.com/blazee5/finance-tracker/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"time"
 )
 
-func (db *TransactionDAO) Create(ctx context.Context, user models.User, transaction domain.Transaction) (string, error) {
-	res, err := db.c.InsertOne(ctx, models.Transaction{User: user, Type: transaction.Type, Amount: transaction.Amount, Description: transaction.Description})
+func (db *TransactionDAO) Create(ctx context.Context, user models.ShortUser, transaction domain.Transaction) (string, error) {
+	if transaction.Date.IsZero() {
+		transaction.Date = time.Now()
+	}
+
+	res, err := db.c.InsertOne(ctx, models.Transaction{User: user, Type: transaction.Type, Amount: transaction.Amount, Description: transaction.Description, CreatedAt: transaction.Date})
 
 	if err != nil {
 		return "", err

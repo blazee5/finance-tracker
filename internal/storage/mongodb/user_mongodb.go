@@ -17,26 +17,6 @@ func (db *UserDAO) Create(ctx context.Context, user models.User) (string, error)
 	return res.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func (db *UserDAO) AddBalance(ctx context.Context, userId string, amount float64) error {
-	objectId, err := primitive.ObjectIDFromHex(userId)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = db.c.UpdateByID(ctx, objectId, bson.D{
-		{"$inc", bson.D{
-			{"balance", amount},
-		}},
-	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (db *UserDAO) GetUser(ctx context.Context, email, password string) (models.User, error) {
 	var user models.User
 
@@ -52,19 +32,19 @@ func (db *UserDAO) GetUser(ctx context.Context, email, password string) (models.
 	return user, nil
 }
 
-func (db *UserDAO) GetUserById(ctx context.Context, id string) (models.User, error) {
-	var user models.User
+func (db *UserDAO) GetUserById(ctx context.Context, id string) (models.ShortUser, error) {
+	var user models.ShortUser
 
 	objectId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return models.User{}, err
+		return models.ShortUser{}, err
 	}
 
 	err = db.c.FindOne(ctx, bson.D{{"_id", objectId}}).Decode(&user)
 
 	if err != nil {
-		return models.User{}, err
+		return models.ShortUser{}, err
 	}
 
 	return user, nil
