@@ -8,14 +8,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func Run(cfg *config.Config) (*mongo.Client, error) {
+func Run(cfg *config.Config) *mongo.Client {
 	opts := options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%s/",
 		cfg.DBHost, cfg.DBPort))
 	client, err := mongo.Connect(context.Background(), opts)
 
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	return client, nil
+	if err := client.Ping(context.Background(), nil); err != nil {
+		panic(err)
+	}
+
+	return client
 }

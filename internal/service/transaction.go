@@ -38,11 +38,41 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, userId strin
 }
 
 func (s *TransactionService) GetTransaction(ctx context.Context, id string) (models.Transaction, error) {
-	return s.repo.Transaction.GetTransaction(ctx, id)
+	cachedTransaction, err := s.repo.TransactionRedis.GetByIdCtx(ctx, id)
+
+	if err != nil {
+		s.log.Infof("error while get transaction from redis: %v", err)
+	}
+
+	if cachedTransaction != nil {
+		return *cachedTransaction, nil
+	}
+
+	transaction, err := s.repo.Transaction.GetTransaction(ctx, id)
+
+	if err != nil {
+		return models.Transaction{}, err
+	}
+
+	if err := s.repo.TransactionRedis.SetTransactionCtx(ctx, id, 3600, transaction); err != nil {
+		s.log.Infof("error while save transaction in redis: %v", err)
+	}
+
+	return transaction, nil
 }
 
-func (s *TransactionService) UpdateTransaction(ctx context.Context, id string, transaction domain.Transaction) (int, error) {
-	return s.repo.Transaction.Update(ctx, id, transaction)
+func (s *TransactionService) UpdateTransaction(ctx context.Context, id string, transaction domain.Transaction) error {
+	_, err := s.repo.Transaction.Update(ctx, id, transaction)
+
+	if err != nil {
+		return err
+	}
+
+	if err := s.repo.TransactionRedis.DeleteTransactionCtx(ctx, id); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *TransactionService) DeleteTransaction(ctx context.Context, id string) error {

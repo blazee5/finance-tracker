@@ -137,7 +137,7 @@ func (h *Handler) UpdateTransaction(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusForbidden).SendString("Forbidden")
 	}
 
-	_, err = h.service.Transaction.UpdateTransaction(c.Context(), id, input)
+	err = h.service.Transaction.UpdateTransaction(c.Context(), id, input)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

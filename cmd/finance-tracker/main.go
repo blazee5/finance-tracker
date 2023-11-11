@@ -7,6 +7,7 @@ import (
 	"github.com/blazee5/finance-tracker/internal/handler"
 	"github.com/blazee5/finance-tracker/internal/repository"
 	"github.com/blazee5/finance-tracker/internal/repository/mongodb"
+	"github.com/blazee5/finance-tracker/internal/repository/redis"
 	"github.com/blazee5/finance-tracker/internal/service"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -27,20 +28,18 @@ func main() {
 	defer logger.Sync()
 	log := logger.Sugar()
 
-	db, err := mongodb.Run(cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
+	db := mongodb.Run(cfg)
+	rdb := redis.Run(cfg)
 
 	app := fiber.New()
 	app.Use(cors.New())
 
 	validate := validator.New()
-	repo := repository.NewRepository(cfg, db)
+	repo := repository.NewRepository(cfg, db, rdb)
 	services := service.NewService(log, repo)
 	handlers := handler.NewHandler(log, services, validate)
 
 	handlers.InitRoutes(app)
 
-	log.Fatal(app.Listen(fmt.Sprintf("%s:%s", cfg.Host, cfg.Port)))
+	log.Fatal(app.Listen(fmt.Sprintf("%s:%s", cfg.HttpServer.Host, cfg.HttpServer.Port)))
 }

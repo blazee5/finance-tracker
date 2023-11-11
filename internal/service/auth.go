@@ -41,5 +41,25 @@ func (s *AuthService) GenerateToken(ctx context.Context, email, password string)
 }
 
 func (s *AuthService) GetUserById(ctx context.Context, id string) (models.ShortUser, error) {
-	return s.repo.User.GetUserById(ctx, id)
+	cachedUser, err := s.repo.UserRedis.GetByIdCtx(ctx, id)
+
+	if err != nil {
+		s.log.Infof("error while get user from redis: %v", err)
+	}
+
+	if cachedUser != nil {
+		return *cachedUser, nil
+	}
+
+	user, err := s.repo.User.GetUserById(ctx, id)
+
+	if err != nil {
+		return models.ShortUser{}, err
+	}
+
+	if err := s.repo.UserRedis.SetUserCtx(ctx, id, 3600, user); err != nil {
+		s.log.Infof("error while save user in redis: %v", err)
+	}
+
+	return user, nil
 }

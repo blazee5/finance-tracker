@@ -18,7 +18,7 @@ type Transaction interface {
 	GetTransactions(ctx context.Context, id string) ([]models.Transaction, error)
 	CreateTransaction(ctx context.Context, userId string, transaction domain.Transaction) (string, error)
 	GetTransaction(ctx context.Context, id string) (models.Transaction, error)
-	UpdateTransaction(ctx context.Context, id string, transaction domain.Transaction) (int, error)
+	UpdateTransaction(ctx context.Context, id string, transaction domain.Transaction) error
 	DeleteTransaction(ctx context.Context, id string) error
 	AnalyzeTransactions(ctx context.Context, id string) (models.Analyze, error)
 }

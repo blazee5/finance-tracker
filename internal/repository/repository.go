@@ -6,13 +6,30 @@ import (
 	"github.com/blazee5/finance-tracker/internal/domain"
 	"github.com/blazee5/finance-tracker/internal/models"
 	"github.com/blazee5/finance-tracker/internal/repository/mongodb"
+	redisRepo "github.com/blazee5/finance-tracker/internal/repository/redis"
+	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Repository struct {
-	db          *mongo.Client
-	User        UserRepository
-	Transaction TransactionRepository
+	db               *mongo.Client
+	rdb              *redis.Client
+	User             UserRepository
+	Transaction      TransactionRepository
+	UserRedis        UserRedisRepository
+	TransactionRedis TransactionRedisRepository
+}
+
+type UserRedisRepository interface {
+	GetByIdCtx(ctx context.Context, key string) (*models.ShortUser, error)
+	SetUserCtx(ctx context.Context, key string, seconds int, user models.ShortUser) error
+	DeleteUserCtx(ctx context.Context, key string) error
+}
+
+type TransactionRedisRepository interface {
+	GetByIdCtx(ctx context.Context, key string) (*models.Transaction, error)
+	SetTransactionCtx(ctx context.Context, key string, seconds int, transaction models.Transaction) error
+	DeleteTransactionCtx(ctx context.Context, key string) error
 }
 
 type UserRepository interface {
@@ -30,10 +47,13 @@ type TransactionRepository interface {
 	GetAnalyze(ctx context.Context, id string) (models.Analyze, error)
 }
 
-func NewRepository(cfg *config.Config, db *mongo.Client) *Repository {
+func NewRepository(cfg *config.Config, db *mongo.Client, rdb *redis.Client) *Repository {
 	return &Repository{
-		db:          db,
-		User:        mongodb.NewUserRepository(cfg, db),
-		Transaction: mongodb.NewTransactionRepository(cfg, db),
+		db:               db,
+		rdb:              rdb,
+		User:             mongodb.NewUserRepository(cfg, db),
+		Transaction:      mongodb.NewTransactionRepository(cfg, db),
+		UserRedis:        redisRepo.NewUserRedisRepository(rdb),
+		TransactionRedis: redisRepo.NewTransactionRedisRepository(rdb),
 	}
 }
