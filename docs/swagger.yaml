@@ -1,9 +1,20 @@
 basePath: /
 definitions:
+  models.ShortUser:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   models.Transaction:
     properties:
       amount:
         type: number
+      created_at:
+        type: string
       description:
         type: string
       id:
@@ -11,12 +22,10 @@ definitions:
       type:
         type: string
       user:
-        $ref: '#/definitions/models.User'
+        $ref: '#/definitions/models.ShortUser'
     type: object
   models.User:
     properties:
-      balance:
-        type: number
       email:
         type: string
       id:
@@ -139,6 +148,68 @@ paths:
       summary: Update transaction
       tags:
       - transactions
+  /api/transactions/analyze:
+    get:
+      consumes:
+      - application/json
+      description: Analyze transactions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Analyze transactions
+      tags:
+      - transactions
+  /api/user:
+    post:
+      consumes:
+      - application/json
+      description: get user by id
+      operationId: get-user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      summary: Get User
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: update user
+      operationId: update-user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: bad request
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      summary: Update User
+      tags:
+      - user
   /auth/signin:
     post:
       consumes:

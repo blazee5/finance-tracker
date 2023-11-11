@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func (h *Handler) userIdentity(c *fiber.Ctx) error {
+func (h *Handler) AuthMiddleware(c *fiber.Ctx) error {
 	header := c.Get("Authorization")
 
 	if header == "" {

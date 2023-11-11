@@ -29,17 +29,18 @@ func (h *Handler) InitRoutes(app *fiber.App) {
 	{
 		user := api.Group("/user")
 		{
-			user.Get("/", h.userIdentity, h.GetUser)
+			user.Get("/", h.AuthMiddleware, h.GetUser)
+			user.Put("/", h.AuthMiddleware, h.UpdateUser)
 		}
 
 		transactions := api.Group("/transactions")
 		{
-			transactions.Get("/analyze", h.userIdentity, h.AnalyzeTransactions)
-			transactions.Get("/", h.userIdentity, h.GetTransactions)
-			transactions.Post("/", h.userIdentity, h.CreateTransaction)
-			transactions.Get("/:id", h.userIdentity, h.GetTransaction)
-			transactions.Put("/:id", h.userIdentity, h.UpdateTransaction)
-			transactions.Delete("/:id", h.userIdentity, h.DeleteTransaction)
+			transactions.Get("/analyze", h.AuthMiddleware, h.AnalyzeTransactions)
+			transactions.Get("/", h.AuthMiddleware, h.GetTransactions)
+			transactions.Post("/", h.AuthMiddleware, h.CreateTransaction)
+			transactions.Get("/:id", h.AuthMiddleware, h.GetTransaction)
+			transactions.Put("/:id", h.AuthMiddleware, h.UpdateTransaction)
+			transactions.Delete("/:id", h.AuthMiddleware, h.DeleteTransaction)
 		}
 	}
 

@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"github.com/blazee5/finance-tracker/internal/domain"
-	"github.com/blazee5/finance-tracker/internal/models"
 	"github.com/blazee5/finance-tracker/internal/repository"
 	"github.com/blazee5/finance-tracker/lib/auth"
 	"go.uber.org/zap"
@@ -38,28 +37,4 @@ func (s *AuthService) GenerateToken(ctx context.Context, email, password string)
 	}
 
 	return auth.GenerateToken(user.ID.Hex())
-}
-
-func (s *AuthService) GetUserById(ctx context.Context, id string) (models.ShortUser, error) {
-	cachedUser, err := s.repo.UserRedis.GetByIdCtx(ctx, id)
-
-	if err != nil {
-		s.log.Infof("error while get user from redis: %v", err)
-	}
-
-	if cachedUser != nil {
-		return *cachedUser, nil
-	}
-
-	user, err := s.repo.User.GetUserById(ctx, id)
-
-	if err != nil {
-		return models.ShortUser{}, err
-	}
-
-	if err := s.repo.UserRedis.SetUserCtx(ctx, id, 3600, user); err != nil {
-		s.log.Infof("error while save user in redis: %v", err)
-	}
-
-	return user, nil
 }

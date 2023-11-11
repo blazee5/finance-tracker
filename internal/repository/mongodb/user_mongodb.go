@@ -62,3 +62,24 @@ func (repo *UserRepository) GetUserById(ctx context.Context, id string) (models.
 
 	return user, nil
 }
+
+func (repo *UserRepository) UpdateUser(ctx context.Context, id string, input domain.UpdateUserRequest) error {
+	objectId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = repo.db.UpdateByID(ctx, objectId, bson.D{
+		{"$set", models.User{
+			Name:  input.Name,
+			Email: input.Email,
+		}},
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -87,31 +87,3 @@ func (h *Handler) SignIn(c *fiber.Ctx) error {
 		"token": token,
 	})
 }
-
-// @Summary Get User
-// @Tags auth
-// @Description get user by id
-// @ID get-user
-// @Accept  json
-// @Produce  json
-// @Success 200 {string} string	"ok"
-// @Failure 500 {string} string "internal server error"
-// @Router /api/user [post]
-func (h *Handler) GetUser(c *fiber.Ctx) error {
-	userId := c.Locals("userId").(string)
-
-	user, err := h.service.Auth.GetUserById(c.Context(), userId)
-
-	if err != nil {
-		h.log.Infof("error while get user: %v", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "server error",
-		})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(domain.User{
-		ID:    user.ID.Hex(),
-		Name:  user.Name,
-		Email: user.Email,
-	})
-}

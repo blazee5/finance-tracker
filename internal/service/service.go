@@ -11,6 +11,10 @@ import (
 type Auth interface {
 	CreateUser(ctx context.Context, user domain.SignUpRequest) (string, error)
 	GenerateToken(ctx context.Context, email, password string) (string, error)
+}
+
+type User interface {
+	Update(ctx context.Context, id string, input domain.UpdateUserRequest) error
 	GetUserById(ctx context.Context, id string) (models.ShortUser, error)
 }
 
@@ -27,12 +31,14 @@ type Service struct {
 	log         *zap.SugaredLogger
 	repo        *repository.Repository
 	Auth        Auth
+	User        User
 	Transaction Transaction
 }
 
 func NewService(log *zap.SugaredLogger, repo *repository.Repository) *Service {
 	return &Service{
 		Auth:        NewAuthService(log, repo),
+		User:        NewUserService(log, repo),
 		Transaction: NewTransactionService(log, repo),
 	}
 }
