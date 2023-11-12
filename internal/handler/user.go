@@ -30,9 +30,10 @@ func (h *Handler) GetUser(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(domain.User{
-		ID:    user.ID.Hex(),
-		Name:  user.Name,
-		Email: user.Email,
+		ID:     user.ID.Hex(),
+		Name:   user.Name,
+		Email:  user.Email,
+		Avatar: user.Avatar,
 	})
 }
 

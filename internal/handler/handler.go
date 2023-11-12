@@ -19,6 +19,8 @@ func NewHandler(log *zap.SugaredLogger, service *service.Service, validator *val
 }
 
 func (h *Handler) InitRoutes(app *fiber.App) {
+	app.Static("/", "./public")
+
 	auth := fiber.Router(app).Group("/auth")
 	{
 		auth.Post("/signup", h.SignUp)
