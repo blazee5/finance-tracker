@@ -30,7 +30,7 @@ func LoadConfig() *Config {
 	var cfg Config
 
 	if err := cleanenv.ReadConfig("config.yml", &cfg); err != nil {
-		log.Fatalf("error while reading config file: %s", err)
+		log.Fatalf("error while reading config file: %v", err)
 	}
 
 	return &cfg

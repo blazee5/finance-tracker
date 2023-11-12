@@ -22,7 +22,7 @@ import (
 //	}
 //
 // @Failure 400 {string} string "bad request"
-// @Failure 500 {string} string "internal server error"
+// @Failure 500 {string} string "server error"
 // @Router /auth/signup [post]
 func (h *Handler) SignUp(c *fiber.Ctx) error {
 	var input domain.SignUpRequest
@@ -59,7 +59,7 @@ func (h *Handler) SignUp(c *fiber.Ctx) error {
 // @Param user body models.User true "User"
 // @Success 200 {string} string	"ok"
 // @Failure 400 {string} string "bad request"
-// @Failure 500 {string} string "internal server error"
+// @Failure 500 {string} string "server error"
 // @Router /auth/signin [post]
 func (h *Handler) SignIn(c *fiber.Ctx) error {
 	var input domain.SignInRequest

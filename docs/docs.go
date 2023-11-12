@@ -43,6 +43,18 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.Transaction"
                         }
+                    },
+                    "404": {
+                        "description": "transaction not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "server error",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
             }
@@ -98,6 +110,12 @@ const docTemplate = `{
                 "responses": {
                     "201": {
                         "description": "Created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "server error",
                         "schema": {
                             "type": "string"
                         }
@@ -233,7 +251,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "internal server error",
+                        "description": "server error",
                         "schema": {
                             "type": "string"
                         }
@@ -261,7 +279,43 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "internal server error",
+                        "description": "server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/avatar": {
+            "post": {
+                "description": "Upload avatar",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Upload avatar",
+                "operationId": "upload-avatar",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "server error",
                         "schema": {
                             "type": "string"
                         }
@@ -308,7 +362,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "internal server error",
+                        "description": "server error",
                         "schema": {
                             "type": "string"
                         }
@@ -355,7 +409,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "internal server error",
+                        "description": "server error",
                         "schema": {
                             "type": "string"
                         }
@@ -368,6 +422,9 @@ const docTemplate = `{
         "models.ShortUser": {
             "type": "object",
             "properties": {
+                "avatar": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -405,6 +462,9 @@ const docTemplate = `{
         "models.User": {
             "type": "object",
             "properties": {
+                "avatar": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -418,6 +478,13 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

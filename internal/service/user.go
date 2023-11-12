@@ -54,3 +54,19 @@ func (s *UserService) Update(ctx context.Context, id string, input domain.Update
 
 	return nil
 }
+
+func (s *UserService) UploadAvatar(ctx context.Context, id string, file string) error {
+	err := s.repo.User.UploadAvatar(ctx, id, file)
+
+	if err != nil {
+		return err
+	}
+
+	err = s.repo.UserRedis.DeleteUserCtx(ctx, id)
+
+	if err != nil {
+		s.log.Infof("error while delete user from redis: %v", err)
+	}
+
+	return nil
+}

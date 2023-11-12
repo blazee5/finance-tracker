@@ -83,3 +83,23 @@ func (repo *UserRepository) UpdateUser(ctx context.Context, id string, input dom
 
 	return nil
 }
+
+func (repo *UserRepository) UploadAvatar(ctx context.Context, id string, file string) error {
+	objectId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = repo.db.UpdateByID(ctx, objectId, bson.D{
+		{"$set", models.User{
+			Avatar: file,
+		}},
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

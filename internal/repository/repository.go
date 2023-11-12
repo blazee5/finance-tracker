@@ -37,6 +37,7 @@ type UserRepository interface {
 	GetUser(ctx context.Context, email, password string) (models.User, error)
 	GetUserById(ctx context.Context, id string) (models.ShortUser, error)
 	UpdateUser(ctx context.Context, id string, input domain.UpdateUserRequest) error
+	UploadAvatar(ctx context.Context, id string, file string) error
 }
 
 type TransactionRepository interface {

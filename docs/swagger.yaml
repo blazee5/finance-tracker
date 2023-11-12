@@ -2,6 +2,8 @@ basePath: /
 definitions:
   models.ShortUser:
     properties:
+      avatar:
+        type: string
       email:
         type: string
       id:
@@ -26,6 +28,8 @@ definitions:
     type: object
   models.User:
     properties:
+      avatar:
+        type: string
       email:
         type: string
       id:
@@ -60,6 +64,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Transaction'
+        "404":
+          description: transaction not found
+          schema:
+            type: string
+        "500":
+          description: server error
+          schema:
+            type: string
       summary: Get transaction
       tags:
       - transactions
@@ -96,6 +108,10 @@ paths:
       responses:
         "201":
           description: Created
+          schema:
+            type: string
+        "500":
+          description: server error
           schema:
             type: string
       summary: Create transaction
@@ -181,7 +197,7 @@ paths:
           schema:
             type: string
         "500":
-          description: internal server error
+          description: server error
           schema:
             type: string
       summary: Get User
@@ -204,10 +220,34 @@ paths:
           schema:
             type: string
         "500":
-          description: internal server error
+          description: server error
           schema:
             type: string
       summary: Update User
+      tags:
+      - user
+  /api/user/avatar:
+    post:
+      consumes:
+      - application/json
+      description: Upload avatar
+      operationId: upload-avatar
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: bad request
+          schema:
+            type: string
+        "500":
+          description: server error
+          schema:
+            type: string
+      summary: Upload avatar
       tags:
       - user
   /auth/signin:
@@ -235,7 +275,7 @@ paths:
           schema:
             type: string
         "500":
-          description: internal server error
+          description: server error
           schema:
             type: string
       summary: Sign in
@@ -266,10 +306,15 @@ paths:
           schema:
             type: string
         "500":
-          description: internal server error
+          description: server error
           schema:
             type: string
       summary: Sign up
       tags:
       - auth
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

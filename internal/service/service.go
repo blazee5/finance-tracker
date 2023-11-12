@@ -16,6 +16,7 @@ type Auth interface {
 type User interface {
 	Update(ctx context.Context, id string, input domain.UpdateUserRequest) error
 	GetUserById(ctx context.Context, id string) (models.ShortUser, error)
+	UploadAvatar(ctx context.Context, id string, file string) error
 }
 
 type Transaction interface {

@@ -31,6 +31,7 @@ func (h *Handler) InitRoutes(app *fiber.App) {
 		{
 			user.Get("/", h.AuthMiddleware, h.GetUser)
 			user.Put("/", h.AuthMiddleware, h.UpdateUser)
+			user.Post("/avatar", h.AuthMiddleware, h.UploadAvatar)
 		}
 
 		transactions := api.Group("/transactions")

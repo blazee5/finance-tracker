@@ -18,6 +18,7 @@ import (
 // @Authorization BearerAuth "Authorization"
 // @Param transaction body models.Transaction true "Transaction"
 // @Success 201 {object} string
+// @Failure 500 {object} string "server error"
 // @Router /api/transactions [post]
 func (h *Handler) CreateTransaction(c *fiber.Ctx) error {
 	var input domain.Transaction
@@ -63,7 +64,9 @@ func (h *Handler) GetTransactions(c *fiber.Ctx) error {
 	transaction, err := h.service.Transaction.GetTransactions(c.Context(), userId)
 
 	if err != nil {
-		return err
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "server error",
+		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(transaction)
@@ -77,6 +80,8 @@ func (h *Handler) GetTransactions(c *fiber.Ctx) error {
 // @Authorization BearerAuth "Authorization"
 // @Param id path string true "Transaction ID"
 // @Success 200 {object} models.Transaction
+// @Failure 404 {string} string "transaction not found"
+// @Failure 500 {string} string "server error"
 // @Router /api/transaction/{id} [get]
 func (h *Handler) GetTransaction(c *fiber.Ctx) error {
 	id := c.Params("id")
@@ -89,7 +94,9 @@ func (h *Handler) GetTransaction(c *fiber.Ctx) error {
 
 	if err != nil {
 		log.Infof("GetTransaction err: %v", err)
-		return c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "server error",
+		})
 	}
 
 	if transaction.User.ID.Hex() != c.Locals("userId").(string) {

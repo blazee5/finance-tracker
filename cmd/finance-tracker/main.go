@@ -20,6 +20,10 @@ import (
 // @description Finance Tracker API Documentation
 // @host localhost:3000
 // @BasePath /
+// @securitydefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @tag.name auth
 func main() {
 	cfg := config.LoadConfig()
 
