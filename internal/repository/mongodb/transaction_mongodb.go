@@ -95,6 +95,7 @@ func (repo *TransactionRepository) Update(ctx context.Context, id string, transa
 		bson.D{{"$set", bson.D{
 			{"type", transaction.Type},
 			{"amount", transaction.Amount},
+			{"category", transaction.Category},
 			{"description", transaction.Description},
 			{"created_at", transaction.Date},
 		}}})
