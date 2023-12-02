@@ -20,7 +20,7 @@ type User interface {
 }
 
 type Transaction interface {
-	GetTransactions(ctx context.Context, id string) ([]models.Transaction, error)
+	GetTransactions(ctx context.Context, id, category string) ([]models.Transaction, error)
 	CreateTransaction(ctx context.Context, userId string, transaction domain.Transaction) (string, error)
 	GetTransaction(ctx context.Context, id string) (models.Transaction, error)
 	UpdateTransaction(ctx context.Context, id string, transaction domain.Transaction) error

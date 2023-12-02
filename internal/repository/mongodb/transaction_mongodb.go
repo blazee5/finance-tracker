@@ -26,7 +26,7 @@ func (repo *TransactionRepository) Create(ctx context.Context, user models.Short
 		transaction.Date = time.Now()
 	}
 
-	res, err := repo.db.InsertOne(ctx, models.Transaction{User: user, Type: transaction.Type, Amount: transaction.Amount, Description: transaction.Description, CreatedAt: transaction.Date})
+	res, err := repo.db.InsertOne(ctx, models.Transaction{User: user, Type: transaction.Type, Category: transaction.Category, Amount: transaction.Amount, Description: transaction.Description, CreatedAt: transaction.Date})
 
 	if err != nil {
 		return "", err
@@ -35,7 +35,7 @@ func (repo *TransactionRepository) Create(ctx context.Context, user models.Short
 	return res.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func (repo *TransactionRepository) GetTransactions(ctx context.Context, id string) ([]models.Transaction, error) {
+func (repo *TransactionRepository) GetTransactions(ctx context.Context, id, category string) ([]models.Transaction, error) {
 	var transactions []models.Transaction
 
 	objectId, err := primitive.ObjectIDFromHex(id)
@@ -44,7 +44,15 @@ func (repo *TransactionRepository) GetTransactions(ctx context.Context, id strin
 		return nil, err
 	}
 
-	cursor, err := repo.db.Find(ctx, bson.D{{"user._id", objectId}})
+	filter := bson.D{
+		{"user._id", objectId},
+	}
+
+	if category != "" {
+		filter = append(filter, bson.E{"category", category})
+	}
+
+	cursor, err := repo.db.Find(ctx, filter)
 
 	if err != nil {
 		return nil, err

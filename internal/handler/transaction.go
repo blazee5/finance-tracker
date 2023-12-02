@@ -57,13 +57,17 @@ func (h *Handler) CreateTransaction(c *fiber.Ctx) error {
 // @Produce json
 // @Authorization BearerAuth "Authorization"
 // @Success 200 {object} []models.Transaction
+// @Failure 500 {string} string "server error"
 // @Router /api/transactions [get]
 func (h *Handler) GetTransactions(c *fiber.Ctx) error {
+	category := c.Query("category", "")
+
 	userId := c.Locals("userId").(string)
 
-	transaction, err := h.service.Transaction.GetTransactions(c.Context(), userId)
+	transaction, err := h.service.Transaction.GetTransactions(c.Context(), userId, category)
 
 	if err != nil {
+		h.log.Infof("error while get transactions: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "server error",
 		})

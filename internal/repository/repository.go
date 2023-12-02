@@ -42,7 +42,7 @@ type UserRepository interface {
 
 type TransactionRepository interface {
 	Create(ctx context.Context, user models.ShortUser, transaction domain.Transaction) (string, error)
-	GetTransactions(ctx context.Context, userID string) ([]models.Transaction, error)
+	GetTransactions(ctx context.Context, userID, category string) ([]models.Transaction, error)
 	GetTransaction(ctx context.Context, id string) (models.Transaction, error)
 	Update(ctx context.Context, id string, transaction domain.Transaction) (int, error)
 	Delete(ctx context.Context, id string) error

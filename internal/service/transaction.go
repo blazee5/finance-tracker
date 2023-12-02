@@ -17,8 +17,8 @@ func NewTransactionService(log *zap.SugaredLogger, repo *repository.Repository) 
 	return &TransactionService{log: log, repo: repo}
 }
 
-func (s *TransactionService) GetTransactions(ctx context.Context, id string) ([]models.Transaction, error) {
-	return s.repo.Transaction.GetTransactions(ctx, id)
+func (s *TransactionService) GetTransactions(ctx context.Context, id, category string) ([]models.Transaction, error) {
+	return s.repo.Transaction.GetTransactions(ctx, id, category)
 }
 
 func (s *TransactionService) CreateTransaction(ctx context.Context, userId string, transaction domain.Transaction) (string, error) {
